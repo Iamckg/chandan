@@ -1,0 +1,14 @@
+public class OTPGenerator {
+       
+     @InvocableMethod(label='Generate OTP'
+                      description='This method will be generating the OTP for users to Login' 
+                      category='New OTP')
+    
+    public static List<String> generateOtp(){   
+       	List<String> responseList = new List<String>();
+        String randomIntegerString = string.valueof(Math.abs(Crypto.getRandomInteger()));
+        String otp = randomIntegerString.substring(0,6);
+        responseList.add(otp);
+        return responseList;
+    }
+}

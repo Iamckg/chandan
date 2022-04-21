@@ -1,0 +1,30 @@
+trigger SendEmailToContacts on Account (after update) {
+        List<String> emailAddresses = new List<String>();
+        map<id,Account> accountMap = new map<id,Account>
+            ([Select Id,(Select Id, email from Contacts) FROM Account]);
+      for(Account acc : trigger.new)
+        {
+          for(Contact con : accountMap.get(acc.id).contacts)
+          {
+            if(con.email != null)
+                {
+                   emailAddresses.add(con.email);
+                }
+          }
+      Messaging.SingleEmailMessage m = new Messaging.SingleEmailMessage();
+   // m.ToAddresses = (emailAddresses);
+   //  m.subject = 'Hi You Have Won a Million Dollars';
+    //        m.setReplyTo('sidaman143@gmail.com');
+    // m.plainTextBody = 'Please come to Us for and claim';
+     //       Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{m}); 
+            // List<Messaging.SendEmailResult> emaillist = Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{m});
+       m.setToAddresses(emailAddresses) ;
+            m.setSubject('Hi You jahave won a Million Dollar');
+            m.setReplyTo('sidaman143@gmail.com');
+            m.setHtmlBody('Please come to us for claim');
+            Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{m});
+            
+           
+
+    }
+}

@@ -1,0 +1,59 @@
+trigger AddQuantity on Order__c (after update) {
+    
+     list<Product__c> plist = new List<Product__c>();
+   map<id, Product__c> pmap = new map<id, product__c>
+       ([select Id, Units_Availabe__c  from Product__c ]);
+    
+   // list<Product__c> plist = new List<Product__c>();
+    
+    for(order__c ord : trigger.new)
+    {
+        order__c oldord = Trigger.oldMap.get(ord.id);
+        Product__c p    = pmap.get(ord.Product__c);
+        
+    if(ord.Cancelled__c != oldord.Cancelled__c  &&  oldord.Cancelled__c == false)
+            {
+                 if(ord.Cancelled__c == true)
+                     {
+                         p.Units_Availabe__c += ord.Quantity__c;
+                     }
+             }
+        
+        
+   else if(ord.Cancelled__c == false && oldord.Cancelled__c == false)
+        {
+          if(ord.Quantity__c>0)
+            {
+              if(ord.Quantity__c > oldord.Quantity__c)
+                {
+                     if(p.Units_Availabe__c < ord.Quantity__c - oldord.Quantity__c)
+                        {
+                          ord.addError('Quantity is more than product available. Total Product available:'
+                                    +p.Units_Availabe__c);
+                        }
+                     else
+                        {
+                          p.Units_Availabe__c -= ord.Quantity__c - oldord.Quantity__c;
+                        }
+                }
+             else if(ord.Quantity__c < oldord.Quantity__c)
+                           {
+                            p.Units_Availabe__c += oldord.Quantity__c - ord.Quantity__c;
+                           }
+           }
+      else
+             {
+               ord.adderror('Quantity can\'t be zero or negative.');
+              }
+           }
+           else 
+             {
+                 ord.addError('This order is cancelled u can\'t make changes');
+             } 
+         
+        plist.add(p);
+    }
+    if(!plist.isEmpty()){
+    update plist;
+}
+}

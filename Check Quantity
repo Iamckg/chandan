@@ -1,0 +1,28 @@
+trigger CheckQuantity on Order__c (before insert) {
+   if(trigger.isinsert&&trigger.isbefore)
+   {
+        map<id, Product__c> pmap =new map<id, Product__c>
+            ([select Id, Units_Availabe__c  from Product__c ]);
+        list<Product__c> plist = new list<Product__c>();
+    for(order__c ord : trigger.new)
+    {
+        Product__c p = pmap.get(ord.Product__c);
+        if(ord.quantity__c >0){
+        if(p.Units_Availabe__c < ord.Quantity__c)
+        {
+            ord.addError('Quantity is more than product available. Total Product available:'+p.Units_Availabe__c);
+        }
+        else
+        {
+            p.Units_Availabe__c -= ord.Quantity__c;
+            plist.add(p);
+        }
+        update plist;
+        }
+        else
+        {
+            ord.adderror('Quantity can\'t be zero or negative.');
+        }
+    }
+  }
+}
